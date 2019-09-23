@@ -1,0 +1,71 @@
+********** SNIPPETS *************
+
+#CELL 12
+
+dataset = dataset_transf_panel19_train
+
+model = make_pipeline(StandardScaler(),
+
+LogisticRegression(solver='liblinear',
+
+random_state=1))
+
+fit_params = {'logisticregression__sample_weight':
+
+dataset.instance_weights}
+
+lr_transf_panel19 = model.fit(dataset.features,
+
+dataset.labels.ravel(), **fit_params)
+
+#CELL 13
+
+thresh_arr = np.linspace(0.01, 0.5, 50)
+
+val_metrics = test(dataset=dataset_orig_panel19_val,
+
+model=lr_transf_panel19,
+
+thresh_arr=thresh_arr)
+
+lr_transf_best_ind = np.argmax(val_metrics['bal_acc'])
+
+lr_transf_metrics = test(dataset=dataset_orig_panel19_test,
+
+model=lr_transf_panel19,
+
+thresh_arr=[thresh_arr[lr_transf_best_ind]])
+
+#CELL 14
+
+describe_metrics(lr_transf_metrics,
+
+[thresh_arr[lr_transf_best_ind]])
+
+#CELL 17
+metric_orig_panel20_deploy = BinaryLabelDatasetMetric(
+
+dataset_orig_panel20_deploy,
+
+unprivileged_groups=unprivileged_groups,
+
+privileged_groups=privileged_groups)
+
+explainer_orig_panel20_deploy =
+
+MetricTextExplainer(metric_orig_panel20_deploy)
+
+#CELL 18
+lr_transf_metrics_panel20_deploy = test(
+
+dataset=dataset_orig_panel20_deploy,
+
+model=lr_transf_panel19,
+
+thresh_arr=[thresh_arr[lr_transf_best_ind]])
+
+#CELL 19
+
+describe_metrics(lr_transf_metrics_panel20_deploy,
+
+[thresh_arr[lr_transf_best_ind]])
